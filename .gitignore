@@ -2,6 +2,7 @@
 /dev
 /logs
 /checkpoints
+/Papers
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
