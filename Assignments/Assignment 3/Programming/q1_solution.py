@@ -21,10 +21,10 @@ def log_likelihood_bernoulli(mu, target):
     batch_size = mu.size(0)
     mu = mu.view(batch_size, -1)
     target = target.view(batch_size, -1)
-    # print(mu.shape)
-    # log_l(ikelihood_bernoulli
-    # return (target*torch.log(mu) + (1-target)*torch.log(1-mu)).mean(dim=1)
-    return
+
+    # log_likelihood_bernoulli
+    ll = (target * torch.log(mu)) + ((1 - target) * torch.log(1 - mu))
+    return ll.sum(dim=1)
 
 
 def log_likelihood_normal(mu, logvar, z):
@@ -45,8 +45,8 @@ def log_likelihood_normal(mu, logvar, z):
     z = z.view(batch_size, -1)
 
     # log normal
-    
-    return
+    ll = -((logvar + np.log(2 * np.pi)) + ((z - mu) ** 2) / logvar.exp()) / 2
+    return ll.sum(dim=1)
 
 
 def log_mean_exp(y):
@@ -69,6 +69,7 @@ def log_mean_exp(y):
     # print(maximum_over_samples.unsqueeze(1))
     kinda_normalized = kinda_normalized.type(torch.FloatTensor)
     return maximum_over_samples + (kinda_normalized.exp().mean(dim=1)).log()
+
 
 def kl_gaussian_gaussian_analytic(mu_q, logvar_q, mu_p, logvar_p):
     """ 
@@ -109,10 +110,26 @@ def kl_gaussian_gaussian_mc(mu_q, logvar_q, mu_p, logvar_p, num_samples=1):
     # init
     batch_size = mu_q.size(0)
     input_size = np.prod(mu_q.size()[1:])
-    mu_q = mu_q.view(batch_size, -1).unsqueeze(1).expand(batch_size, num_samples, input_size)
-    logvar_q = logvar_q.view(batch_size, -1).unsqueeze(1).expand(batch_size, num_samples, input_size)
-    mu_p = mu_p.view(batch_size, -1).unsqueeze(1).expand(batch_size, num_samples, input_size)
-    logvar_p = logvar_p.view(batch_size, -1).unsqueeze(1).expand(batch_size, num_samples, input_size)
+    mu_q = (
+        mu_q.view(batch_size, -1)
+        .unsqueeze(1)
+        .expand(batch_size, num_samples, input_size)
+    )
+    logvar_q = (
+        logvar_q.view(batch_size, -1)
+        .unsqueeze(1)
+        .expand(batch_size, num_samples, input_size)
+    )
+    mu_p = (
+        mu_p.view(batch_size, -1)
+        .unsqueeze(1)
+        .expand(batch_size, num_samples, input_size)
+    )
+    logvar_p = (
+        logvar_p.view(batch_size, -1)
+        .unsqueeze(1)
+        .expand(batch_size, num_samples, input_size)
+    )
 
     # kld
     return
